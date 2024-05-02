@@ -9,27 +9,55 @@ import pokemonAPIFetch from "@/src/axios/config";
 import PokeballImage from "@/public/images/pokeball8bits.webp";
 
 const Pokedex = () => {
-  const [pokemonName, setPokemonName] = useState("");
+  const [pokemonFind, setPokemonFind] = useState("");
   const [pokemonImage, setPokemonImage] = useState<string | null>(null);
+  const [pokemonType, setPokemonType] = useState<string[]>([]);
+  const [pokemonWeight, setPokemonWeight] = useState<string>("");
+  const [pokemonHeight, setPokemonHeight] = useState<string>("");
+  const [pokemonName, setPokemonName] = useState<string>("");
 
   const getPokemonData = async () => {
     try {
-      const response = await pokemonAPIFetch.get(`/pokemon/${pokemonName}`);
+      let response;
+      if (pokemonFind === "") {
+        response = await pokemonAPIFetch.get(`/pokemon/`);
+      } else {
+        response = await pokemonAPIFetch.get(`/pokemon/${pokemonFind}`);
+      }
 
-      const imageUrl = response.data.sprites.front_default;
+      const data = response.data;
 
-      setPokemonImage(imageUrl);
+      if (data.sprites && data.sprites.front_default) {
+        setPokemonImage(data.sprites.front_default);
+      }
+
+      if (data.name) {
+        setPokemonName(data.name);
+      }
+
+      if (data.types) {
+        const types = data.types.map(
+          (typeObject: { type: { name: string } }) => typeObject.type.name
+        );
+        setPokemonType(types);
+      }
+
+      if (data.weight) {
+        setPokemonWeight(data.weight);
+      }
+
+      if (data.height) {
+        setPokemonHeight(data.height);
+      }
 
       console.log(response);
     } catch (error) {
-      console.log("ERRO", error);
+      console.error("Error fetching Pokemon data:", error);
     }
   };
 
-  const handleInputChange = (event: {
-    target: { value: SetStateAction<string> };
-  }) => {
-    setPokemonName(event.target.value);
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPokemonFind(event.target.value);
   };
 
   return (
@@ -39,7 +67,7 @@ const Pokedex = () => {
           type="search"
           placeholder="Pokemon Name"
           className="w-72"
-          value={pokemonName}
+          value={pokemonFind}
           onChange={handleInputChange}
         />
         <Button
@@ -51,7 +79,7 @@ const Pokedex = () => {
           Search
         </Button>
       </div>
-      {pokemonImage !== null && (
+      {pokemonImage && (
         <div className="flex flex-col items-center">
           <Image
             src={pokemonImage}
@@ -59,10 +87,25 @@ const Pokedex = () => {
             width={200}
             height={200}
           />
-          <div className="flex gap-x-4">
-            <h1>Weight</h1>
-            <h1>Height</h1>
-            <h1>Type</h1>
+          <h1>{pokemonName}</h1>
+
+          <div className="flex gap-x-10">
+            <div>
+              <h1 className="font-medium">Types:</h1>
+              {pokemonType.map((type, index) => (
+                <p key={index}> {type}</p>
+              ))}
+            </div>
+
+            <div className="flex flex-col">
+              <h1 className="font-medium">Weight: </h1>
+              <h1 className="font-normal">{pokemonWeight} Kgs</h1>
+            </div>
+
+            <div>
+              <h1 className="font-medium">Height: </h1>
+              <h1>{pokemonHeight} dm</h1>
+            </div>
           </div>
         </div>
       )}
