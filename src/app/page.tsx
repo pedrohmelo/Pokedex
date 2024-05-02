@@ -1,4 +1,4 @@
-import Index from "@/pages";
+import Index from "@/src/pages/home";
 
 export default function Home() {
   return (

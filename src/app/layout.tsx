@@ -4,7 +4,7 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-import Navbar from "@/components/navbar";
+import Navbar from "@/src/components/navbar";
 
 export const metadata: Metadata = {
   title: "Pokedex",
