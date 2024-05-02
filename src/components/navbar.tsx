@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import Link from "next/link";
 
 import { FiMenu, FiX } from "react-icons/fi";
 import PokemonLogo from "@/public/images/pokemonLogo.webp";
@@ -32,9 +33,15 @@ const Navbar = () => {
             <div className="mt-4">
               <h1 className="text-xl font-bold">Menu</h1>
               <ul className="flex flex-col gap-y-2 mt-2">
-                <li className="text-lg cursor-pointer">Pokedex</li>
-                <li className="text-lg cursor-pointer">Video Games</li>
-                <li className="text-lg cursor-pointer">Card Game</li>
+                <li className="text-lg cursor-pointer">
+                  <Link href={"/pokedex"}>Pokedex</Link>
+                </li>
+                <li className="text-lg cursor-pointer">
+                  <Link href={"/videogames"}>Video Games</Link>
+                </li>
+                <li className="text-lg cursor-pointer">
+                  <Link href={"/cardgames"}>Card Game</Link>
+                </li>
               </ul>
             </div>
           </div>
