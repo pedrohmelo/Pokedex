@@ -22,7 +22,7 @@ const Navbar = () => {
         </div>
         <Image src={PokemonLogo} alt="Pokémon Logo" className="w-28" />
         <div
-          className={`fixed top-0 left-0 h-full w-3/4 bg-[#0D0D0D] z-50 transition-transform duration-300 ease-in-out transform ${
+          className={`fixed top-0 left-0 h-full w-3/4 bg-[#fff] z-50 transition-transform duration-300 ease-in-out transform ${
             menuOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
