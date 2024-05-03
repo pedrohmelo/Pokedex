@@ -1,111 +1,136 @@
 "use client";
 
-import { SetStateAction, useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/src/components/ui/input";
 import { Button } from "@/src/components/ui/button";
 import Image from "next/image";
 
+import pokeballImage from "@/public/images/pokeball8bits.webp";
 import pokemonAPIFetch from "@/src/axios/config";
-import PokeballImage from "@/public/images/pokeball8bits.webp";
+
+interface PokemonDetails {
+  name: string;
+  sprites: {
+    front_default: string;
+  };
+}
 
 const Pokedex = () => {
-  const [pokemonFind, setPokemonFind] = useState("");
-  const [pokemonImage, setPokemonImage] = useState<string | null>(null);
-  const [pokemonType, setPokemonType] = useState<string[]>([]);
-  const [pokemonWeight, setPokemonWeight] = useState<string>("");
-  const [pokemonHeight, setPokemonHeight] = useState<string>("");
-  const [pokemonName, setPokemonName] = useState<string>("");
+  const [pokemonList, setPokemonList] = useState<any[]>([]);
+  const [filteredPokemonList, setFilteredPokemonList] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const getPokemonData = async () => {
-    try {
-      let response;
-      if (pokemonFind === "") {
-        response = await pokemonAPIFetch.get(`/pokemon/`);
-      } else {
-        response = await pokemonAPIFetch.get(`/pokemon/${pokemonFind}`);
-      }
+  const itemsPerPage = 12;
 
-      const data = response.data;
-
-      if (data.sprites && data.sprites.front_default) {
-        setPokemonImage(data.sprites.front_default);
-      }
-
-      if (data.name) {
-        setPokemonName(data.name);
-      }
-
-      if (data.types) {
-        const types = data.types.map(
-          (typeObject: { type: { name: string } }) => typeObject.type.name
+  useEffect(() => {
+    const fetchPokemonList = async () => {
+      setLoading(true);
+      try {
+        const response = await pokemonAPIFetch.get(
+          `/pokemon/?limit=${itemsPerPage}&offset=${
+            (currentPage - 1) * itemsPerPage
+          }`
         );
-        setPokemonType(types);
+        const pokemonNames = response.data.results.map((pokemon: any) => ({
+          name: pokemon.name,
+          sprites: {},
+        }));
+        await getPokemonData(pokemonNames);
+      } catch (error) {
+        setError("Error fetching Pokemon list");
+      } finally {
+        setLoading(false);
       }
+    };
+    fetchPokemonList();
+  }, [currentPage]);
 
-      if (data.weight) {
-        setPokemonWeight(data.weight);
-      }
+  useEffect(() => {
+    if (searchTerm === "") {
+      setFilteredPokemonList(pokemonList);
+    } else {
+      const filtered = pokemonList.filter((pokemon: PokemonDetails) =>
+        pokemon.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredPokemonList(filtered);
+    }
+  }, [searchTerm, pokemonList]);
 
-      if (data.height) {
-        setPokemonHeight(data.height);
-      }
-
-      console.log(response);
+  const getPokemonData = async (pokemonNames: any[]) => {
+    try {
+      const updatedPokemonList = await Promise.all(
+        pokemonNames.map(async (pokemon: any) => {
+          const response = await pokemonAPIFetch.get(
+            `/pokemon/${pokemon.name}`
+          );
+          return response.data;
+        })
+      );
+      setPokemonList(updatedPokemonList);
+      setFilteredPokemonList(updatedPokemonList);
     } catch (error) {
-      console.error("Error fetching Pokemon data:", error);
+      setError("Error fetching Pokemon individual data");
     }
   };
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPokemonFind(event.target.value);
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePrevPage = () => {
+    setCurrentPage((prevPage) => prevPage - 1);
   };
 
   return (
     <main className="px-4">
-      <div className="flex gap-x-2">
+      <div className="flex gap-x-2 mb-4">
         <Input
-          type="search"
-          placeholder="Pokemon Name"
+          type="text"
+          placeholder="Search Pokemon"
           className="w-72"
-          value={pokemonFind}
-          onChange={handleInputChange}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <Button
-          className="flex gap-x-2 items-center justify-center"
-          variant={"default"}
-          onClick={getPokemonData}
-        >
-          <Image src={PokeballImage} alt="Pokeball Image" className="w-8" />
+        <Button className="flex gap-x-2 items-center justify-center">
+          <Image src={pokeballImage} alt="Pokeball Image" className="w-6" />
           Search
         </Button>
       </div>
-      {pokemonImage && (
-        <div className="flex flex-col items-center">
-          <Image
-            src={pokemonImage}
-            alt="Pokemon Image"
-            width={200}
-            height={200}
-          />
-          <h1>{pokemonName}</h1>
-
-          <div className="flex gap-x-10">
-            <div>
-              <h1 className="font-medium">Types:</h1>
-              {pokemonType.map((type, index) => (
-                <p key={index}> {type}</p>
-              ))}
-            </div>
-
-            <div className="flex flex-col">
-              <h1 className="font-medium">Weight: </h1>
-              <h1 className="font-normal">{pokemonWeight} Kgs</h1>
-            </div>
-
-            <div>
-              <h1 className="font-medium">Height: </h1>
-              <h1>{pokemonHeight} dm</h1>
-            </div>
+      {error && <p className="text-red-500">{error}</p>}
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <div>
+          <ul className="grid grid-cols-3 gap-4">
+            {filteredPokemonList.map(
+              (pokemon: PokemonDetails, index: number) => (
+                <li key={index}>
+                  <div className="flex flex-col items-center justify-center border rounded-md bg-slate-100 hover:bg-slate-200">
+                    <Image
+                      src={pokemon.sprites.front_default}
+                      alt={pokemon.name}
+                      width={100}
+                      height={100}
+                    />
+                    <p className="font-medium">{pokemon.name}</p>
+                  </div>
+                </li>
+              )
+            )}
+          </ul>
+          <div className="mt-4 flex justify-between">
+            <Button onClick={handlePrevPage} disabled={currentPage === 1}>
+              Previous
+            </Button>
+            <Button
+              onClick={handleNextPage}
+              disabled={filteredPokemonList.length < itemsPerPage}
+            >
+              Next
+            </Button>
           </div>
         </div>
       )}
