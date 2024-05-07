@@ -6,7 +6,7 @@ import { Button } from "@/src/components/ui/button";
 import Image from "next/image";
 
 import pokeballImage from "@/public/images/pokeball8bits.webp";
-import pokemonAPIFetch from "@/src/axios/config";
+import pokemonAPIFetch from "@/src/api/api";
 
 interface PokemonDetails {
   name: string;
