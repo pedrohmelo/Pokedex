@@ -1,8 +1,10 @@
 "use server";
 
-export async function getPokemonList() {
+export async function getAllPokemonList(offset: number, limit: number) {
   try {
-    const response = await fetch("https://pokeapi.co/api/v2/pokemon/");
+    const response = await fetch(
+      `https://pokeapi.co/api/v2/pokemon/?offset=${offset}&limit=${limit}`
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch Pokemon list");
     }
@@ -19,7 +21,7 @@ export async function getPokemonDetails(pokemonName: string) {
     `https://pokeapi.co/api/v2/pokemon/${pokemonName}`
   );
   if (!response.ok) {
-    throw new Error("Feiled to fetch pokemon details");
+    throw new Error("Failed to fetch pokemon details");
   }
 
   return response.json();

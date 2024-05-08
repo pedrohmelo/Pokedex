@@ -8,7 +8,11 @@ interface AbilityType {
 }
 
 interface PokemonDetailsType {
-  abilities: AbilityType[];
+  abilities: {
+    ability: {
+      name: string;
+    };
+  }[];
 }
 
 interface PokemonDetailsProps {
@@ -22,7 +26,7 @@ const PokemonDetails = ({ pokemonName }: PokemonDetailsProps) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getPokemonDetails(pokemonName); // Use pokemonName recebido como prop
+        const data = await getPokemonDetails(pokemonName);
         setPokemonDetails(data);
       } catch (error) {
         console.error("Error fetching pokemon details: ", error);
@@ -33,18 +37,18 @@ const PokemonDetails = ({ pokemonName }: PokemonDetailsProps) => {
   }, [pokemonName]); // Adicionando pokemonName como dependência para que useEffect seja chamado quando ele mudar
 
   return (
-    <main className="">
-      <div>Pokemon CARD</div>
+    <main className="border">
+      <div>Pokemon {pokemonName}</div>
 
       {pokemonDetails && (
-        <>
+        <div className="">
           <h1>Abilities:</h1>{" "}
           <ul>
             {pokemonDetails.abilities.map((ability, index) => (
               <li key={index}>{ability.ability.name}</li>
             ))}
           </ul>
-        </>
+        </div>
       )}
     </main>
   );
