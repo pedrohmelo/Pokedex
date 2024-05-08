@@ -37,9 +37,6 @@ const Navbar = () => {
                   <Link href={"/pokedex"}>Pokedex</Link>
                 </li>
                 <li className="text-lg cursor-pointer">
-                  <Link href={"/videogames"}>Video Games</Link>
-                </li>
-                <li className="text-lg cursor-pointer">
                   <Link href={"/cardgames"}>Card Game</Link>
                 </li>
               </ul>
